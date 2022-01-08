@@ -56,6 +56,13 @@ def parse_datasets(args, device):
         trajectories_to_sample = 1000
         trajectories, t = sine(trajectories_to_sample, device)
 
+        # # Normalise
+        # samples = trajectories.shape[0]
+        # dim = trajectories.shape[2]
+        # traj = (trajectories.view(-1, dim) - trajectories.view(-1,
+        #         dim).mean(0)) / trajectories.view(-1, dim).std(0)
+        # trajectories = torch.reshape(traj, (samples, -1, dim))
+
         traj_index = torch.randperm(trajectories.shape[0])
         train_split = int(0.8 * trajectories.shape[0])
         test_split = int(0.9 * trajectories.shape[0])
