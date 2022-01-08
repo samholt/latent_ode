@@ -303,7 +303,7 @@ if __name__ == '__main__':
         train_res["loss"].backward()
         optimizer.step()
 
-        if itr % 1 == 0:
+        if itr % num_batches == 0:
             pred_y, info = model.get_reconstruction(batch_dict["tp_to_predict"],
                                                     batch_dict["observed_data"], batch_dict["observed_tp"],
                                                     mask=batch_dict["observed_mask"], n_traj_samples=1,
@@ -313,7 +313,7 @@ if __name__ == '__main__':
                      [0, :, 0].detach(), label='truth')
             plt.plot(pred_y[0, 0, :, 0].detach(), label='prediction')
             plt.legend()
-            plt.savefig('out_itr_{}.png'.format(itr))
+            plt.savefig('{}_{}.png'.format(args.dataset, itr // num_batches))
             # print(pred_y[0, 0, :, 0].detach().cpu().tolist())
 
         n_iters_to_viz = 1

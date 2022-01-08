@@ -36,6 +36,27 @@ def sine(trajectories_to_sample, device):
     return trajectories, t
 
 
+def dde_ramp_loading_time_sol(trajectories_to_sample, device):
+    t_end = 20.0
+    t_nsamples = 200
+    t_begin = t_end / t_nsamples
+    ti = torch.linspace(t_begin, t_end,
+                        t_nsamples).to(device)
+    result = []
+    for t in ti:
+        if t < 5:
+            result.append(0)
+        elif 5 <= t < 10:
+            result.append(
+                (1.0 / 4.0) * ((t - 5) - 0.5 * torch.sin(2 * (t - 5))))
+        elif 10 <= t:
+            result.append((1.0 / 4.0) * ((t - 5) - (t - 10) - 0.5 *
+                                         torch.sin(2 * (t - 5)) + 0.5 * torch.sin(2 * (t - 10))))
+    y = torch.Tensor(result).to(device) / 5.0
+    trajectories = y.view(1, -1, 1).repeat(trajectories_to_sample, 1, 1)
+    return trajectories, ti
+
+
 def parse_datasets(args, device):
 
     def basic_collate_fn(batch, time_steps, args=args, device=device, data_type="train"):
@@ -52,9 +73,13 @@ def parse_datasets(args, device):
 
     n_total_tp = args.timepoints + args.extrap
     max_t_extrap = args.max_t / args.timepoints * n_total_tp
-    if dataset_name == "sine":
+    if dataset_name == "sine" or dataset_name == "dde_ramp_loading_time_sol":
         trajectories_to_sample = 1000
-        trajectories, t = sine(trajectories_to_sample, device)
+        if dataset_name == "sine":
+            trajectories, t = sine(trajectories_to_sample, device)
+        elif dataset_name == "dde_ramp_loading_time_sol":
+            trajectories, t = dde_ramp_loading_time_sol(
+                trajectories_to_sample, device)
 
         # # Normalise
         # samples = trajectories.shape[0]
